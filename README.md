@@ -1,4 +1,4 @@
-Zabbix Template 
+**Zabbix Template** 
 
 System Resources Monitoring 
 Описание 
