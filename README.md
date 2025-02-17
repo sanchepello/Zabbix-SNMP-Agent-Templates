@@ -64,51 +64,51 @@
 
 Пример:
 
-tags:
-
-\- tag: component
-
-value: cpu
-
-\- tag: metric
-
-value: load
-
-\- tag: purpose
-
-value: status
+>tags:
+>
+>\- tag: component
+>
+>value: cpu
+>
+>\- tag: metric
+>
+>value: load
+>
+>\- tag: purpose
+>
+>value: status
 
 **Примеры триггеров**
 
 **Пример 1: Высокая нагрузка на CPU**
 
-expression: 'last(/System Performance/system.cpu.load[percpu,avg1]) > 5'
-
-name: 'High CPU Load'
-
-priority: AVERAGE
-
-description: 'Высокая нагрузка на CPU'
+>expression: 'last(/System Performance/system.cpu.load[percpu,avg1]) > 5'
+>
+>name: 'High CPU Load'
+>
+>priority: AVERAGE
+>
+>description: 'Высокая нагрузка на CPU'
 
 **Пример 2: Высокое использование CPU**
 
-expression: 'avg(/System Performance/system.cpu.util[,,],5m) > 80'
-
-name: 'High CPU Usage'
-
-priority: HIGH
-
-description: 'Высокое использование CPU'
+>expression: 'avg(/System Performance/system.cpu.util[,,],5m) > 80'
+>
+>name: 'High CPU Usage'
+>
+>priority: HIGH
+>
+>description: 'Высокое использование CPU'
 
 **Пример 3: Низкий уровень свободной RAM**
 
-expression: 'last(/System Performance/vm.memory.size[free]) < [критическое значение]'
-
-name: 'Low Free RAM'
-
-priority: CRITICAL
-
-description: 'Недостаточно свободной оперативной памяти'
+>expression: 'last(/System Performance/vm.memory.size[free]) < [критическое значение]'
+>
+>name: 'Low Free RAM'
+>
+>priority: CRITICAL
+>
+>description: 'Недостаточно свободной оперативной памяти'
 
 **Лицензия**
 
