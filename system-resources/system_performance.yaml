@@ -1,0 +1,341 @@
+zabbix_export:
+  version: '6.0'
+  date: '2025-02-17T14:05:32Z'
+  groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: MFCTemplates
+  templates:
+    - uuid: 2e865c4475064ea88fab7009cf93bffa
+      template: 'System Performance'
+      name: 'System Performance'
+      groups:
+        - name: MFCTemplates
+      items:
+        - uuid: 92088b6e24874a6c8eb4c7a31710418a
+          name: 'CPU Core Load'
+          key: 'system.cpu.load[percpu,avg1]'
+          value_type: FLOAT
+          description: 'Средняя нагрузка на процессор за последнюю минуту'
+          tags:
+            - tag: component
+              value: cpu
+            - tag: metric
+              value: load
+            - tag: purpose
+              value: status
+          triggers:
+            - uuid: 4dc5b5b8506c48e583f5be43f7abfa2f
+              expression: 'last(/System Performance/system.cpu.load[percpu,avg1])>5'
+              name: 'High CPU Load'
+              priority: AVERAGE
+              description: 'Высокая нагрузка на CPU'
+        - uuid: e368ebb6e938452c89bb514112b68491
+          name: 'CPU Utilization (%)'
+          key: 'system.cpu.util[,,]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Использование процессора в процентах'
+          tags:
+            - tag: component
+              value: cpu
+            - tag: metric
+              value: usage
+            - tag: purpose
+              value: performance
+          triggers:
+            - uuid: e91880b305ac42d799613e7eb688e538
+              expression: 'avg(/System Performance/system.cpu.util[,,],5m)>80'
+              name: 'High CPU Usage'
+              priority: HIGH
+              description: 'Высокое использование CPU'
+        - uuid: d7cd1e5769734e0cb76bea9949f8d5e7
+          name: 'Free RAM'
+          key: 'vm.memory.size[free]'
+          units: B
+          tags:
+            - tag: component
+              value: memory
+            - tag: metric
+              value: used
+            - tag: purpose
+              value: performance
+          triggers:
+            - uuid: 8884a351576c4ae2a6fcf02258ce3918
+              expression: 'last(/System Performance/vm.memory.size[free])<"100MB"'
+              name: 'Low Free Memory'
+              priority: HIGH
+              description: 'Низкий уровень свободной оперативной памяти'
+        - uuid: a5621134c649416fa7902b80f6c81000
+          name: 'Total RAM'
+          key: 'vm.memory.size[total]'
+          units: B
+          tags:
+            - tag: component
+              value: memory
+            - tag: metric
+              value: total
+            - tag: purpose
+              value: status
+        - uuid: d7dffdfc800a43309a550b60e452fd8f
+          name: 'Used RAM'
+          key: 'vm.memory.size[used]'
+          units: B
+          tags:
+            - tag: component
+              value: memory
+            - tag: metric
+              value: used
+            - tag: purpose
+              value: performance
+      discovery_rules:
+        - uuid: 84030103c56540acbd504dc44b16006a
+          name: 'Network Interface Discovery'
+          key: net.if.discovery
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#IFNAME}'
+                value: '^eth[0-9]+$|^enp[0-9]+s[0-9]+$|^wlan[0-9]+$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 936d357f746849a484664f26bfa8dfab
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              key: 'net.if.in[{#IFNAME}]'
+              history: 7d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: metric
+                  value: incoming
+                - tag: purpose
+                  value: traffic
+            - uuid: a1cec787cc7d48eaada21c37238f0a33
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              key: 'net.if.out[{#IFNAME}]'
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: metric
+                  value: outgoing
+                - tag: purpose
+                  value: traffic
+          graph_prototypes:
+            - uuid: 4304cba974b44ccbbf54452ea9ada8ad
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 1A7C11
+                  yaxisside: RIGHT
+                  item:
+                    host: 'System Performance'
+                    key: 'net.if.in[{#IFNAME}]'
+            - uuid: a11f842d6495451881043203ac3a96fe
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 1A7C11
+                  yaxisside: RIGHT
+                  item:
+                    host: 'System Performance'
+                    key: 'net.if.out[{#IFNAME}]'
+            - uuid: 57415a505fde40778ba491eaf5a24fe3
+              name: 'Interface {#IFNAME}({#IFALIAS}): Network traffic'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'System Performance'
+                    key: 'net.if.in[{#IFNAME}]'
+                - sortorder: '1'
+                  color: '274482'
+                  item:
+                    host: 'System Performance'
+                    key: 'net.if.out[{#IFNAME}]'
+        - uuid: 822105415bbc4377a24087ee19e9ee6d
+          name: 'Disk Discovery (Universal)'
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#FSNAME}'
+                value: '^/$|^/bin$|^/dev$|^/etc$|^/home$|^/lib$|^/media$|^/opt$|^/tmp$|^/data$|^/usr$|^/var$|^[A-Z]:$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 9bcf2968930043169fd3201046eaec71
+              name: 'Free Disk Space on {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},free]'
+              units: B
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: free
+                - tag: purpose
+                  value: status
+            - uuid: c3ee31ad4efe40559c47226610399642
+              name: 'Total Disk Space on {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},total]'
+              units: B
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: total
+                - tag: purpose
+                  value: status
+            - uuid: 83922595961641d2bbfb8cf7131c6964
+              name: 'Used Disk Space on {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},used]'
+              units: B
+              tags:
+                - tag: component
+                  value: disk
+                - tag: metric
+                  value: used
+                - tag: purpose
+                  value: performance
+          graph_prototypes:
+            - uuid: 689f367932884dc3b7e4a95d10d19c51
+              name: 'Disk Space on {#FSNAME}'
+              yaxismax: '0'
+              show_work_period: 'NO'
+              show_triggers: 'NO'
+              type: PIE
+              graph_items:
+                - color: 4CAF50
+                  calc_fnc: MIN
+                  item:
+                    host: 'System Performance'
+                    key: 'vfs.fs.size[{#FSNAME},free]'
+                - sortorder: '1'
+                  color: 4000FF
+                  calc_fnc: MIN
+                  item:
+                    host: 'System Performance'
+                    key: 'vfs.fs.size[{#FSNAME},total]'
+      dashboards:
+        - uuid: 4cfbbec0f4484d089ae85d45c8746185
+          name: 'System Performance'
+          display_period: '60'
+          pages:
+            - widgets:
+                - type: GRAPH_CLASSIC
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'CPU Core Load'
+                - type: GRAPH_CLASSIC
+                  'y': '5'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'Used RAM'
+                - type: GRAPH_PROTOTYPE
+                  'y': '10'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+                - type: GRAPH_CLASSIC
+                  x: '12'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'CPU Utilization (%)'
+                - type: GRAPH_PROTOTYPE
+                  x: '12'
+                  'y': '5'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'Disk Space on {#FSNAME}'
+                - type: GRAPH_PROTOTYPE
+                  x: '12'
+                  'y': '10'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'System Performance'
+                        name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+  graphs:
+    - uuid: 39a529bebd26473ca01d80f6b2754cfa
+      name: 'CPU Core Load'
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'System Performance'
+            key: 'system.cpu.load[percpu,avg1]'
+    - uuid: 8488b7b1390649f99a5f1154ea69e146
+      name: 'CPU Utilization (%)'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'System Performance'
+            key: 'system.cpu.util[,,]'
+    - uuid: 8e98d6d0c5de487fbe061dd45edc42b4
+      name: 'Used RAM'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: MIN
+          item:
+            host: 'System Performance'
+            key: 'vm.memory.size[free]'
+        - sortorder: '1'
+          color: FF0000
+          calc_fnc: ALL
+          item:
+            host: 'System Performance'
+            key: 'vm.memory.size[total]'
