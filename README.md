@@ -82,3 +82,5 @@
 **Автор**
 
 - **sanchepello** 🎩
+  - Email: sancheuz401@gmail.com
+  - GitHub: https://github.com/sanchepello
