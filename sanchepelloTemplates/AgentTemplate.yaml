@@ -1,16 +1,24 @@
 zabbix_export:
   version: '6.0'
-  date: '2025-02-17T14:37:48Z'
+  date: '2025-02-24T11:17:33Z'
   groups:
     - uuid: 7df96b18c230490a9a0a9e2307226338
-      name: AgentTemplates
+      name: 'Sanchepello Templates'
   templates:
     - uuid: 2e865c4475064ea88fab7009cf93bffa
-      template: 'System Performance'
-      name: 'System Performance'
+      template: 'Agent Template'
+      name: 'Agent Template'
       groups:
-        - name: AgentTemplates
+        - name: 'Sanchepello Templates'
       items:
+        - uuid: 51586e00504f43c18e1473e507642f77
+          name: 'Agent Version'
+          key: agent.version
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: version
         - uuid: 92088b6e24874a6c8eb4c7a31710418a
           name: 'CPU Core Load'
           key: 'system.cpu.load[percpu,avg1]'
@@ -25,10 +33,19 @@ zabbix_export:
               value: status
           triggers:
             - uuid: 4dc5b5b8506c48e583f5be43f7abfa2f
-              expression: 'last(/System Performance/system.cpu.load[percpu,avg1])>5'
+              expression: 'last(/Agent Template/system.cpu.load[percpu,avg1])>5'
               name: 'High CPU Load'
               priority: AVERAGE
               description: 'Высокая нагрузка на CPU'
+              tags:
+                - tag: trigger
+                  value: CPU
+        - uuid: f445b275bf774a66bf5376cd4f5be072
+          name: 'CPU Core Num'
+          key: 'system.cpu.num[]'
+          tags:
+            - tag: component
+              value: cpu
         - uuid: e368ebb6e938452c89bb514112b68491
           name: 'CPU Utilization (%)'
           key: 'system.cpu.util[,,]'
@@ -44,10 +61,75 @@ zabbix_export:
               value: performance
           triggers:
             - uuid: e91880b305ac42d799613e7eb688e538
-              expression: 'avg(/System Performance/system.cpu.util[,,],5m)>80'
+              expression: 'avg(/Agent Template/system.cpu.util[,,],5m)>80'
               name: 'High CPU Usage'
               priority: HIGH
               description: 'Высокое использование CPU'
+              tags:
+                - tag: trigger
+                  value: CPU
+        - uuid: 8ce221caf6f144b59aab831a8170fd68
+          name: Hostname
+          key: 'system.hostname[,]'
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: system
+        - uuid: 959500c54c7941b48575aa1d71923ce8
+          name: 'USB Devices'
+          key: 'system.hw.devices[usb]'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            - tag: component
+              value: hardware
+        - uuid: 6cc45e48c8274d499a7d033fe208c324
+          name: 'MAC Adresses'
+          key: 'system.hw.macaddr[,]'
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: hardware
+        - uuid: e65ff84dd15f4efba0ba2e721ef706c4
+          name: Architecture
+          key: system.sw.arch
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: software
+        - uuid: 1616223d980c4ed4991dd64856fc5953
+          name: OS
+          key: 'system.sw.os[name]'
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: software
+        - uuid: fc92fa5b2f504aeab47ce674193cd810
+          name: 'Installed Packages'
+          key: 'system.sw.packages[,,]'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            - tag: component
+              value: software
+        - uuid: 5e9f361bf503450bbcf31ecf5704fa4b
+          name: 'Swap File'
+          key: 'system.swap.size[,]'
+          units: B
+          tags:
+            - tag: component
+              value: swap
+        - uuid: 317c1220c4bd4d52891e92e28502dccd
+          name: 'Users Num'
+          key: system.users.num
+          units: users
+          tags:
+            - tag: component
+              value: system
         - uuid: d7cd1e5769734e0cb76bea9949f8d5e7
           name: 'Free RAM'
           key: 'vm.memory.size[free]'
@@ -61,10 +143,13 @@ zabbix_export:
               value: performance
           triggers:
             - uuid: 8884a351576c4ae2a6fcf02258ce3918
-              expression: 'last(/System Performance/vm.memory.size[free])<"100MB"'
-              name: 'Low Free Memory'
+              expression: 'last(/Agent Template/vm.memory.size[free])<"100MB"'
+              name: 'Low Free RAM'
               priority: HIGH
               description: 'Низкий уровень свободной оперативной памяти'
+              tags:
+                - tag: trigger
+                  value: RAM
         - uuid: a5621134c649416fa7902b80f6c81000
           name: 'Total RAM'
           key: 'vm.memory.size[total]'
@@ -137,34 +222,34 @@ zabbix_export:
                   value: traffic
           graph_prototypes:
             - uuid: 4304cba974b44ccbbf54452ea9ada8ad
-              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              name: 'Interface {#IFNAME}: Bits received'
               graph_items:
                 - drawtype: BOLD_LINE
                   color: 1A7C11
                   yaxisside: RIGHT
                   item:
-                    host: 'System Performance'
+                    host: 'Agent Template'
                     key: 'net.if.in[{#IFNAME}]'
             - uuid: a11f842d6495451881043203ac3a96fe
-              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              name: 'Interface {#IFNAME}: Bits sent'
               graph_items:
                 - drawtype: BOLD_LINE
                   color: 1A7C11
                   yaxisside: RIGHT
                   item:
-                    host: 'System Performance'
+                    host: 'Agent Template'
                     key: 'net.if.out[{#IFNAME}]'
             - uuid: 57415a505fde40778ba491eaf5a24fe3
-              name: 'Interface {#IFNAME}({#IFALIAS}): Network traffic'
+              name: 'Interface {#IFNAME}: Network traffic'
               graph_items:
                 - color: 1A7C11
                   item:
-                    host: 'System Performance'
+                    host: 'Agent Template'
                     key: 'net.if.in[{#IFNAME}]'
                 - sortorder: '1'
                   color: '274482'
                   item:
-                    host: 'System Performance'
+                    host: 'Agent Template'
                     key: 'net.if.out[{#IFNAME}]'
         - uuid: 822105415bbc4377a24087ee19e9ee6d
           name: 'Disk Discovery (Universal)'
@@ -220,41 +305,54 @@ zabbix_export:
                 - color: 4CAF50
                   calc_fnc: MIN
                   item:
-                    host: 'System Performance'
+                    host: 'Agent Template'
                     key: 'vfs.fs.size[{#FSNAME},free]'
                 - sortorder: '1'
-                  color: 4000FF
+                  color: '274482'
                   calc_fnc: MIN
                   item:
-                    host: 'System Performance'
-                    key: 'vfs.fs.size[{#FSNAME},total]'
+                    host: 'Agent Template'
+                    key: 'vfs.fs.size[{#FSNAME},used]'
       dashboards:
         - uuid: 4cfbbec0f4484d089ae85d45c8746185
           name: 'System Performance'
           display_period: '60'
           pages:
             - widgets:
+                - type: ITEM
+                  name: Название
+                  width: '8'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Agent Template'
+                        key: 'system.hostname[,]'
+                    - type: INTEGER
+                      name: show
+                      value: '2'
                 - type: GRAPH_CLASSIC
+                  'y': '2'
                   width: '12'
                   height: '5'
                   fields:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'System Performance'
+                        host: 'Agent Template'
                         name: 'CPU Core Load'
                 - type: GRAPH_CLASSIC
-                  'y': '5'
+                  'y': '7'
                   width: '12'
                   height: '5'
                   fields:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'System Performance'
+                        host: 'Agent Template'
                         name: 'Used RAM'
                 - type: GRAPH_PROTOTYPE
-                  'y': '10'
+                  'y': '12'
                   width: '12'
                   height: '5'
                   fields:
@@ -264,21 +362,35 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid
                       value:
-                        host: 'System Performance'
-                        name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+                        host: 'Agent Template'
+                        name: 'Interface {#IFNAME}: Bits received'
+                - type: ITEM
+                  name: ОС
+                  x: '8'
+                  width: '8'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Agent Template'
+                        key: 'system.sw.os[name]'
+                    - type: INTEGER
+                      name: show
+                      value: '2'
                 - type: GRAPH_CLASSIC
                   x: '12'
+                  'y': '2'
                   width: '12'
                   height: '5'
                   fields:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'System Performance'
+                        host: 'Agent Template'
                         name: 'CPU Utilization (%)'
                 - type: GRAPH_PROTOTYPE
                   x: '12'
-                  'y': '5'
+                  'y': '7'
                   width: '12'
                   height: '5'
                   fields:
@@ -288,11 +400,11 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid
                       value:
-                        host: 'System Performance'
+                        host: 'Agent Template'
                         name: 'Disk Space on {#FSNAME}'
                 - type: GRAPH_PROTOTYPE
                   x: '12'
-                  'y': '10'
+                  'y': '12'
                   width: '12'
                   height: '5'
                   fields:
@@ -302,17 +414,40 @@ zabbix_export:
                     - type: GRAPH_PROTOTYPE
                       name: graphid
                       value:
-                        host: 'System Performance'
-                        name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+                        host: 'Agent Template'
+                        name: 'Interface {#IFNAME}: Bits sent'
+                - type: ITEM
+                  name: 'Пользователей в системе'
+                  x: '16'
+                  width: '8'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Agent Template'
+                        key: system.users.num
+                    - type: INTEGER
+                      name: show
+                      value: '2'
   graphs:
     - uuid: 39a529bebd26473ca01d80f6b2754cfa
       name: 'CPU Core Load'
+      ymax_type_1: ITEM
+      ymax_item_1:
+        host: 'Agent Template'
+        key: 'system.cpu.num[]'
       graph_items:
         - color: 1A7C11
           calc_fnc: ALL
           item:
-            host: 'System Performance'
+            host: 'Agent Template'
             key: 'system.cpu.load[percpu,avg1]'
+        - sortorder: '1'
+          color: FF0000
+          calc_fnc: ALL
+          item:
+            host: 'Agent Template'
+            key: 'system.cpu.num[]'
     - uuid: 8488b7b1390649f99a5f1154ea69e146
       name: 'CPU Utilization (%)'
       ymin_type_1: FIXED
@@ -321,21 +456,34 @@ zabbix_export:
         - color: 1A7C11
           calc_fnc: ALL
           item:
-            host: 'System Performance'
+            host: 'Agent Template'
             key: 'system.cpu.util[,,]'
     - uuid: 8e98d6d0c5de487fbe061dd45edc42b4
       name: 'Used RAM'
       show_work_period: 'NO'
       show_triggers: 'NO'
+      ymax_type_1: ITEM
+      ymax_item_1:
+        host: 'Agent Template'
+        key: 'vm.memory.size[total]'
       graph_items:
         - color: 1A7C11
           calc_fnc: MIN
           item:
-            host: 'System Performance'
+            host: 'Agent Template'
             key: 'vm.memory.size[free]'
         - sortorder: '1'
           color: FF0000
           calc_fnc: ALL
           item:
-            host: 'System Performance'
+            host: 'Agent Template'
             key: 'vm.memory.size[total]'
+    - uuid: 41144b069c9b4f0c93adf8e4decd0ff4
+      name: 'Users Num'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'Agent Template'
+            key: system.users.num

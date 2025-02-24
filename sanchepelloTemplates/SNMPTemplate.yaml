@@ -1,0 +1,212 @@
+zabbix_export:
+  version: '6.0'
+  date: '2025-02-24T11:17:56Z'
+  groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: 'Sanchepello Templates'
+  templates:
+    - uuid: eedebd1bfb454f91a7490f6fd287790c
+      template: 'SNMP Template'
+      name: 'SNMP Template'
+      groups:
+        - name: 'Sanchepello Templates'
+      items:
+        - uuid: 571f96176e5c452681d17f2128781457
+          name: 'CPU Utilization (%)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.11.9.0
+          key: cpu.load.1min
+          units: '%'
+        - uuid: c4bd4748683f4fc3b3b199a8aac94ae5
+          name: 'RAM Total'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.5.0
+          key: memory.total
+          units: B
+        - uuid: ff0dd6ed7394405c92a74d4a777604b7
+          name: 'RAM Usage'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.6.0
+          key: memory.usage
+          units: B
+      discovery_rules:
+        - uuid: 18ff0148581843679e6e6ac85466834e
+          name: 'SNMP Discovery for Interfaces'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3,{#IFIN},1.3.6.1.2.1.2.2.1.10,{#IFOUT},1.3.6.1.2.1.2.2.1.16]'
+          key: net.if.discovery
+          delay: 1h
+          item_prototypes:
+            - uuid: 96564e34036640c7b5b9b8eb176277ef
+              name: 'Interface {#IFNAME}({#IFALIAS}): Dropped Packets'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
+              key: 'ifInDiscards[{#IFNAME}]'
+              units: packages
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              trigger_prototypes:
+                - uuid: 3d40a9d5af7c466cb9bba7ca80ce9e3b
+                  expression: 'last(/SNMP Template/ifInDiscards[{#IFNAME}],#300)>100'
+                  name: 'Большая потеря пакетов'
+                  priority: HIGH
+            - uuid: b6619f947c0245dfbead676679f2b11a
+              name: 'Interface {#IFNAME}({#IFALIAS}): Input Errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'ifInErrors[{#IFNAME}]'
+              units: errors
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              trigger_prototypes:
+                - uuid: aa37d9005ede4fc0ac0f6302b689c6ae
+                  expression: 'last(/SNMP Template/ifInErrors[{#IFNAME}],#300)>100'
+                  name: 'Большое количество ошибок входа'
+                  priority: AVERAGE
+            - uuid: 15e75f577cb4452389847811f3ce31d6
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits received'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}'
+              key: 'ifInOctets[{#SNMPINDEX}]'
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              trigger_prototypes:
+                - uuid: 6a3fe01cf9bf4845b980bf5229b88add
+                  expression: 'last(/SNMP Template/ifInOctets[{#SNMPINDEX}],#300)>1000000000'
+                  name: 'Превышение входного трафика'
+                  priority: AVERAGE
+            - uuid: 6d717d608178497980a0880f874e3909
+              name: 'Interface {#IFNAME}({#IFALIAS}): Operational Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'ifOperStatus[{#IFNAME}]'
+              valuemap:
+                name: 'Operational Status'
+            - uuid: 4c64fb022150402ea096667bb12ef3b5
+              name: 'Interface {#IFNAME}({#IFALIAS}): Output Errors'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'ifOutErrors[{#IFNAME}]'
+              units: errors
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              trigger_prototypes:
+                - uuid: 680ff338f6834024a54df0127d0e0765
+                  expression: 'last(/SNMP Template/ifOutErrors[{#IFNAME}],#300)>100'
+                  name: 'Большое количество ошибок выхода'
+                  priority: AVERAGE
+            - uuid: 1a7f45c5a0e14e0b828b624120f9447c
+              name: 'Interface {#IFNAME}({#IFALIAS}): Bits sent'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}'
+              key: 'ifOutOctets[{#SNMPINDEX}]'
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              trigger_prototypes:
+                - uuid: 77df2f6ec26743efa2f6dc26aa7bd117
+                  expression: 'last(/SNMP Template/ifOutOctets[{#SNMPINDEX}],#300)>1000000000'
+                  name: 'Превышение исходящего трафика'
+                  priority: AVERAGE
+            - uuid: 9357455307e84df6873162c001f11360
+              name: 'Interface {#IFNAME}({#IFALIAS}): Interface Speed'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.5.{#SNMPINDEX}'
+              key: 'ifSpeed[{#IFNAME}]'
+              units: bps
+          graph_prototypes:
+            - uuid: 1ca9575b9ce547eaa1cca4a62fe40fa9
+              name: 'Network traffic {#IFNAME} {#IFALIAS}'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'SNMP Template'
+                    key: 'ifInOctets[{#SNMPINDEX}]'
+                - sortorder: '1'
+                  drawtype: FILLED_REGION
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'SNMP Template'
+                    key: 'ifOutOctets[{#SNMPINDEX}]'
+      dashboards:
+        - uuid: 8f8dd4a3dc66458ebc99ed1e1c2e9f98
+          name: 'Network traffic'
+          display_period: '60'
+          pages:
+            - widgets:
+                - type: GRAPH_PROTOTYPE
+                  width: '24'
+                  height: '12'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'SNMP Template'
+                        name: 'Network traffic {#IFNAME} {#IFALIAS}'
+                    - type: INTEGER
+                      name: rows
+                      value: '2'
+      valuemaps:
+        - uuid: e8046f064ef2473ba25115b79e415d23
+          name: 'Operational Status'
+          mappings:
+            - value: '0'
+              newvalue: down
+            - value: '1'
+              newvalue: up
+  graphs:
+    - uuid: c70db3f3a31d47a3bbdf50914cd5691c
+      name: 'CPU Utilization (%)'
+      ymax_type_1: FIXED
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'SNMP Template'
+            key: cpu.load.1min
+    - uuid: f36f172f444748a3998df1173fe5e39b
+      name: 'RAM Usage'
+      ymax_type_1: ITEM
+      ymax_item_1:
+        host: 'SNMP Template'
+        key: memory.total
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'SNMP Template'
+            key: memory.usage
